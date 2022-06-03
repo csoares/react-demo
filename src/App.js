@@ -1,36 +1,16 @@
-import React, { Component } from "react";
+import React, { useState } from "react";
 import axios from "axios";
 import Button from "react-bootstrap/Button";
 import { Form, Container, Row, Col } from "react-bootstrap";
 
-class App extends Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      username: "",
-      password: "",
-      error: "",
-      token: "",
-    };
-    this.handleChange = this.handleChange.bind(this);
-    this.handleSubmit = this.handleSubmit.bind(this);
-  }
+function App() {
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
+  const [token, setToken] = useState("");
 
-  handleChange(event) {
-    if (event.target.id === "username") {
-      this.setState({
-        username: event.target.value,
-      });
-      return;
-    }
-    this.setState({
-      password: event.target.value,
-    });
-  }
-
-  handleSubmit(event) {
+  const handleSubmit = (event) => {
     event.preventDefault();
-    const { username, password } = this.state;
     const route = "http://5.22.217.225:5000/auth/";
     const options = {
       method: "POST",
@@ -55,63 +35,56 @@ class App extends Component {
       })
       .then((data) => {
         console.log(data);
-        this.setState({
-          token: data.accessToken,
-        });
-        this.setState({
-          error: "",
-        });
+        setToken(data.accessToken);
+        setError("");
       })
       .catch((error) => {
         console.error(error);
-        this.setState({
-          error: "erro na autenticação",
-        });
+        setToken("");
+        setError("incorrect login");
       });
-  }
+  };
 
-  render() {
-    return (
-      <Container>
+  return (
+    <Container>
+      <Row>
+        <Form onSubmit={handleSubmit}>
+          <Form.Label> Login:</Form.Label>
+          <Form.Group className="mb-3">
+            <Form.Control
+              id="username"
+              type="text"
+              placeholder="Enter username"
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
+            />
+          </Form.Group>
+          <Form.Group className="mb-3">
+            <Form.Control
+              id="password"
+              type="password"
+              placeholder="Enter password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+            />
+          </Form.Group>
+          <Button variant="primary" type="submit">
+            Submit
+          </Button>
+        </Form>
+      </Row>
+      <Row>
+        <Col>
+          <p> {token} </p>
+        </Col>
+      </Row>
+      {error.length > 0 && (
         <Row>
-          <Form onSubmit={this.handleSubmit}>
-            <Form.Label> Login:</Form.Label>
-            <Form.Group className="mb-3">
-              <Form.Control
-                id="username"
-                type="text"
-                placeholder="Enter username"
-                value={this.state.username}
-                onChange={this.handleChange}
-              />
-            </Form.Group>
-            <Form.Group className="mb-3">
-              <Form.Control
-                id="password"
-                type="password"
-                placeholder="Enter password"
-                value={this.state.password}
-                onChange={this.handleChange}
-              />
-            </Form.Group>
-            <Button variant="primary" type="submit">
-              Submit
-            </Button>
-          </Form>
+          <Col>{error !== "" ? <p> {error} </p> : null}</Col>
         </Row>
-        <Row>
-          <Col>
-            <p> {this.state.token} </p>
-          </Col>
-        </Row>
-        <Row>
-          <Col>
-            {this.state.error !== "" ? <p> {this.state.error} </p> : null}
-          </Col>
-        </Row>
-      </Container>
-    );
-  }
+      )}
+    </Container>
+  );
 }
 
 export default App;
